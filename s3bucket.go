@@ -22,13 +22,13 @@ func (bucket *S3Bucket) String() string {
 
 
 // returns a listing of all objects within the bucket
-func (bucket *S3Bucket) ListObjects() (*[]S3Object,error) {
+func (bucket *S3Bucket) ListObjects() ([]*S3Object,error) {
     return nil,S3Error{"not implemented yet"}
 }
 
 
 // returns a listing of all objects within the bucket that have the specified leading path components
-func (bucket *S3Bucket) ListObjectsWithin(path string) (*[]S3Object,error) {
+func (bucket *S3Bucket) ListObjectsWithin(path string) ([]*S3Object,error) {
     return nil,S3Error{"not implemented yet"}
 }
 

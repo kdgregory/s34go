@@ -11,8 +11,8 @@ type S3Service struct {
 
 // Creates a new instance of an S3Service, and verifies that it can be used (this
 // implies a call to S3)
-func NewS3Service(endpoint string, publicKey string, secretKey string) (*S3Service,error) {
-    return &S3Service{endpoint, publicKey, secretKey},nil
+func NewS3Service(publicKey string, secretKey string) (*S3Service,error) {
+    return &S3Service{DEFAULT_ENDPOINT, publicKey, secretKey}, nil
 }
 
 
@@ -30,7 +30,7 @@ func (service *S3Service) String() string {
 
 // Returns a list of the buckets accessible from this service; each bucket
 // can then be used to access the objects it contains
-func (service *S3Service) ListBuckets() (*[]S3Bucket,error) {
+func (service *S3Service) ListBuckets() ([]*S3Bucket,error) {
     return nil,S3Error{"not implemented yet"}
 }
 
