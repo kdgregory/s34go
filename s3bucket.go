@@ -23,7 +23,16 @@ func (bucket *S3Bucket) String() string {
 
 // returns a listing of all objects within the bucket
 func (bucket *S3Bucket) ListObjects() ([]*S3Object,error) {
-    return nil,S3Error{"not implemented yet"}
+    request := bucket.newS3Request().prepare()
+    response,err := request.execute(bucket.service.client)
+    if err != nil {
+        return nil, err
+    }
+
+    defer response.Close()
+
+    // FIXME - process list of objects
+    return make([]*S3Object,0),nil
 }
 
 
@@ -48,4 +57,15 @@ func (bucket *S3Bucket) Delete() error {
 // deletes this bucket, after first deleting all of the objects it contains
 func (bucket *S3Bucket) DeleteCascade() error {
     return S3Error{"not implemented yet"}
+}
+
+
+//----------------------------------------------------------------------------------------------
+//  Internals - package accessible
+//----------------------------------------------------------------------------------------------
+
+// Creates a new request from this bucket; reduces repeated code and keeps objects from digging
+// into the bucket and service details.
+func (bucket *S3Bucket) newS3Request() *S3Request {
+    return bucket.service.newS3Request().SetBucketName(bucket.name)
 }
