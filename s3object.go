@@ -5,8 +5,8 @@ import "io"
 
 // Represents an object within a specific bucket
 type S3Object struct {
-    path         string
     bucket      *S3Bucket
+    path         string
 }
 
 

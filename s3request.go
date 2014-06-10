@@ -203,36 +203,52 @@ func (request *S3Request) scope() string {
 }
 
 func (request *S3Request) canonicalRequestString() string {
-	return request.method + "\n" +
-		request.canonicalPath() + "\n" +
-		request.canonicalQueryString() + "\n" +
-		request.canonicalHeaders() + "\n" +
-		request.signedHeaders() + "\n" +
-		request.payloadHash()
+	str := request.method + "\n" +
+		   request.canonicalPath() + "\n" +
+		   request.canonicalQueryString() + "\n" +
+		   request.canonicalHeaders() + "\n" +
+		   request.signedHeaders() + "\n" +
+		   request.payloadHash()
+    log.Println("canonical request string:\n" + str)
+    return str
 }
 
 func (request *S3Request) stringToSign() string {
-log.Println("canonical request string:\n" + request.canonicalRequestString())
-	return "AWS4-HMAC-SHA256" + "\n" +
-		request.timestamp.UTC().Format("20060102T150405Z") + "\n" +
-		request.scope() + "\n" +
-		computeHash(strings.NewReader(request.canonicalRequestString()))
+	str := "AWS4-HMAC-SHA256" + "\n" +
+		   request.timestamp.UTC().Format("20060102T150405Z") + "\n" +
+		   request.scope() + "\n" +
+		   computeHash(strings.NewReader(request.canonicalRequestString()))
+    log.Println("string to sign:\n" + str)
+    return str
 }
 
 func (request *S3Request) signingKey() []byte {
-	dateKey := sign([]byte("AWS4"+request.secretKey), []byte(request.timestamp.Format("20060102")))
+    log.Println("access key = " + request.accessKey)
+    log.Println("secret key = " + request.secretKey)
+
+    dateStr := request.timestamp.Format("20060102")
+	dateKey := sign([]byte("AWS4"+request.secretKey), []byte(dateStr))
+    log.Println("date key = ", hex.EncodeToString(dateKey))
+
 	regionKey := sign(dateKey, []byte(request.region))
+    log.Println("date+region key = ", hex.EncodeToString(regionKey))
+
 	serviceKey := sign(regionKey, []byte("s3"))
-	return sign(serviceKey, []byte("aws4_request"))
+    log.Println("date+region+service key = ", hex.EncodeToString(serviceKey))
+
+	signingKey := sign(serviceKey, []byte("aws4_request"))
+    log.Println("signing key = ", hex.EncodeToString(signingKey))
+    return signingKey
 }
 
 func (request *S3Request) authHeader() string {
-log.Println("string to sign:\n" + request.stringToSign())
-	signedString := sign(request.signingKey(), []byte(request.stringToSign()))
-	return "AWS4-HMAC-SHA256 " +
-		"Credential=" + request.accessKey + "/" + request.scope() + ", " +
-		"SignedHeaders=" + request.signedHeaders() + ", " +
-		"Signature=" + hex.EncodeToString(signedString)
+	signature := sign(request.signingKey(), []byte(request.stringToSign()))
+    str := "AWS4-HMAC-SHA256 " +
+		   "Credential=" + request.accessKey + "/" + request.scope() + ", " +
+		   "SignedHeaders=" + request.signedHeaders() + ", " +
+		   "Signature=" + hex.EncodeToString(signature)
+    log.Println("auth header:\n" + str)
+    return str
 }
 
 func (request *S3Request) constructUrl() string {
@@ -243,7 +259,6 @@ func (request *S3Request) constructUrl() string {
             url = url + request.objectName
         }
     }
-
     return url
 }
 

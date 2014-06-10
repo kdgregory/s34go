@@ -4,8 +4,8 @@ package s34go
 
 // Represents a specific bucket, accessed via a specific service
 type S3Bucket struct {
-    name        string
     service     *S3Service
+    name        string
 }
 
 
@@ -44,7 +44,7 @@ func (bucket *S3Bucket) ListObjectsWithin(path string) ([]*S3Object,error) {
 
 // creates an object reference for the specified name; does not make a server call
 func (bucket *S3Bucket) NewObject(name string) (*S3Object,error) {
-    return &S3Object{name, bucket},nil
+    return &S3Object{bucket, name},nil
 }
 
 
